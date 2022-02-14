@@ -3,9 +3,11 @@
     public class Computadoras
     {
 
+        public int Id { get; set; }
+
         public String Marca { get; set; }
 
-        public String Modelo { get; set; }
+        public List<Complementos> complementos  { get; set; }
 
     }
 }

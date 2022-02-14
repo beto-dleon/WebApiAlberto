@@ -12,6 +12,7 @@ namespace WebApiAlberto
         }
 
         public DbSet<Computadoras> Computadoras { get; set; }
+        public DbSet<Complementos> Complementos { get; set; }
 
     }
 }

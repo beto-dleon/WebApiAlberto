@@ -14,11 +14,12 @@ namespace WebApiAlberto.Controllers
             this.dbContext = context;
         }
 
-        [HttpGet]
+        [HttpGet("lista")]
         public async Task<ActionResult<List<Complementos>>> GetAll()
         {
             return await dbContext.Complementos.ToListAsync();
         }
+
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Complementos>> GetById(int id)

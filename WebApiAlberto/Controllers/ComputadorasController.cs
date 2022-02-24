@@ -15,14 +15,40 @@ namespace WebApiAlberto.Controllers
             this.dbContext = context;
         }
 
-        [HttpGet]
+
+        [HttpGet("lista")]
         public async Task<ActionResult<List<Computadoras>>> Get()
         {
             return await dbContext.Computadoras.Include(x => x.complementos).ToListAsync();
         }
 
+        [HttpGet("lista/primero")]
+        public async Task<ActionResult<Computadoras>> PrimeroEnLista([FromHeader] int valor, [FromQuery] string computadora, [FromQuery] int computadoraId)//Estos from se usaron como prueba *Quitarlos después*
+        {
+            return await dbContext.Computadoras.Include(x => x.complementos).FirstOrDefaultAsync();
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Computadoras>> GetForId(int id)
+        {
+            var compu = await dbContext.Computadoras.Include(x => x.complementos).FirstOrDefaultAsync(x => x.Id == id);
+
+            if(compu == null)
+            { 
+                return NotFound();
+            }
+
+            return compu;
+        }
+
+        [HttpGet("{marca}")]
+        public async Task<ActionResult<Computadoras>> GetForMarca([FromRoute]string marca)
+        {
+            return await dbContext.Computadoras.Include(x => x.complementos).FirstOrDefaultAsync(x => x.Marca.Contains(marca));  
+        }
+
         [HttpPost]
-        public async Task<ActionResult> Post(Computadoras computadoras)
+        public async Task<ActionResult> Post([FromBody]Computadoras computadoras)
         {
             dbContext.Add(computadoras);
             await dbContext.SaveChangesAsync();

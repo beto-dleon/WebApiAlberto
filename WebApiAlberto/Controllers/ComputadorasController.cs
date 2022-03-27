@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAlberto.Entitys;
+using WebApiAlberto.Filtros;
+using WebApiAlberto.Services;
 
 namespace WebApiAlberto.Controllers
 {
@@ -10,15 +12,48 @@ namespace WebApiAlberto.Controllers
     {
 
         private readonly ApplicationDbContext dbContext;
-        public ComputadorasController(ApplicationDbContext context)
+        private readonly IService service;
+        private readonly ServiceTransient serviceTransient;
+        private readonly ServiceScoped serviceScoped;
+        private readonly ServiceSingleton serviceSingleton;
+        private readonly ILogger<ComputadorasController> logger;
+        public ComputadorasController(ApplicationDbContext context, IService service,
+            ServiceTransient serviceTransient, ServiceScoped serviceScoped,
+            ServiceSingleton serviceSingleton, ILogger<ComputadorasController> logger)
         {
             this.dbContext = context;
+            this.service = service;
+            this.serviceTransient = serviceTransient;
+            this.serviceScoped = serviceScoped;
+            this.serviceSingleton = serviceSingleton;
+            this.logger = logger;
         }
 
+        [HttpGet("GUID")]
+        [ResponseCache(Duration = 10)]
+        [ServiceFilter(typeof(FiltroDeAccion))]
+        public ActionResult ObtenerGuid()
+        {
+            //throw new NotImplementedException();
+            //logger.LogInformation("Durante la ejecución");
+            return Ok(new
+            {
+                LibrosControllerTransient = serviceTransient.guid,
+                ServiceA_Transient = service.GetTransient(),
+                LibrosControllerScoped = serviceScoped.guid,
+                ServiceA_Scoped = service.GetScoped(),
+                LibrosControllerSingleton = serviceSingleton.guid,
+                ServiceA_Singleton = service.GetSingleton()
+            });
+        }
 
         [HttpGet("lista")]
         public async Task<ActionResult<List<Computadoras>>> Get()
         {
+            //throw new NotImplementedException();
+            logger.LogInformation("Se obtiene el listado de las computadoras");
+            logger.LogWarning("Se obtiene el listado de computadoras!");
+            service.EjecutarJob();
             return await dbContext.Computadoras.Include(x => x.complementos).ToListAsync();
         }
 
@@ -34,10 +69,12 @@ namespace WebApiAlberto.Controllers
             var compu = await dbContext.Computadoras.Include(x => x.complementos).FirstOrDefaultAsync(x => x.Id == id);
 
             if(compu == null)
-            { 
+            {
+                logger.LogError("No se encuentra el registro");
                 return NotFound();
             }
 
+            logger.LogWarning("Se obtiene la computadora con ID: " + id);
             return compu;
         }
 
